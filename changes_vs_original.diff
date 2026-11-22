@@ -1,0 +1,133 @@
+--- a/TILscout.py (github.com/huibozh/TILScout, commit 470419a)
++++ b/TILscout_TMA.py
+@@ -2,15 +2,18 @@
+ """
+ TILScout
+ @author: Huibo Zhang
++
++Adapted to untiled .tif images of tissue microarray cores: only the patch
++generation differs from the original TILscout.py
++(https://github.com/huibozh/TILScout, commit 470419a). See README.md.
+ """
+ 
+ """
+ ### patch generation
+ """
+-import openslide
++import cv2
+ import numpy as np
+ import tifffile as tiff
+-from openslide.deepzoom import DeepZoomGenerator
+ import os
+ import glob
+ import concurrent.futures
+@@ -30,53 +33,66 @@
+ if not os.path.exists(results_path):
+     os.makedirs(results_path)
+ 
+-# Function to process images and generate patches
+-def process_image(directory_path, patch_path):
+-    label = os.path.basename(directory_path)
++# Patch size (150 x 150 pixels, as in the original)
++TILE_SIZE = 150
++
++logging.basicConfig(
++    level=logging.INFO,
++    filename='tile_processing.log',
++    filemode='a',
++    format='%(asctime)s - %(levelname)s - %(message)s'
++)
++
++def process_image(file_path, patch_root, tile_size=TILE_SIZE, stride=None):
++    label = os.path.basename(file_path)
+     print("Processing:", label)
+-    file_name = os.path.join(patch_path, label[:-4]) #label[:-4], exclude extension of original file
+-    os.makedirs(file_name, exist_ok=True)
+-    
+-    try:
+-        slide = openslide.OpenSlide(directory_path)
+-    except Exception as e:
+-        print(f"Error opening slide at {directory_path}: {str(e)}")
++
++    out_dir = os.path.join(patch_root, os.path.splitext(label)[0])
++    os.makedirs(out_dir, exist_ok=True)
++
++    img = cv2.imread(file_path, cv2.IMREAD_COLOR)
++    if img is None:
++        print(f"Error reading image at {file_path}")
++        logging.error(f"Error reading image at {file_path}")
++        return
++
++    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
++    H, W, _ = img_rgb.shape
++    if stride is None:
++        stride = tile_size
++
++    cols = (W - tile_size) // stride + 1 if W >= tile_size else 0
++    rows = (H - tile_size) // stride + 1 if H >= tile_size else 0
++
++    if cols == 0 or rows == 0:
++        print(f"Image too small for tiling ({W}x{H})")
++        logging.warning(f"Image too small for tiling ({W}x{H})")
+         return
+-    
+-    objective = float(slide.properties[openslide.PROPERTY_NAME_OBJECTIVE_POWER])
+-    tiles = DeepZoomGenerator(slide, tile_size=150, overlap=0, limit_bounds=False)
+-    level = tiles.level_count - 1 if objective < 40.0 else tiles.level_count - 2
+-    cols, rows = tiles.level_tiles[level]
+ 
+     for row in range(rows):
+         for col in range(cols):
+-            process_tile(tiles, level, col, row, file_name, label)
+-
+-# Configure logging
+-logging.basicConfig(level=logging.INFO, filename='tile_processing.log', filemode='a',
+-                    format='%(asctime)s - %(levelname)s - %(message)s')
+-def process_tile(tiles, level, col, row, file_name, label):
+-    tile_name = f"{col}_{row}"
+-    try:
+-        temp_tile = tiles.get_tile(level, (col, row))
+-        temp_tile_RGB = temp_tile.convert('RGB')
+-        temp_tile_np = np.array(temp_tile_RGB)
+-        if temp_tile_np.mean() < 230 and temp_tile_np.std() > 15:
+-            # Log processing event 
+-            norm_img, _, _ = norm_HnE(temp_tile_np, Io=240, alpha=1, beta=0.15)
+-            tiff.imsave(os.path.join(file_name, f"{tile_name}_{label[:23]}_norm.tif"), norm_img)
+-            logging.info(f"Processing tile number: {tile_name}")
+-        else:
+-            # Log skipping event
+-            logging.info(f"Skipping tile: {tile_name}")
+-    except Exception as e:
+-        # Log errors
+-        logging.error(f"Error processing tile {tile_name}: {str(e)}")
++            y0 = row * stride
++            x0 = col * stride
++            tile = img_rgb[y0:y0+tile_size, x0:x0+tile_size, :]
++
++            if tile.shape[0] != tile_size or tile.shape[1] != tile_size:
++                continue
++
++            try:
++                if tile.mean() < 230 and tile.std() > 15:
++                    norm_img, _, _ = norm_HnE(tile, Io=240, alpha=1, beta=0.15)
++                    tile_name = f"{col}_{row}_{label[:23]}_norm.tif"
++                    tiff.imwrite(os.path.join(out_dir, tile_name), norm_img)
++                    logging.info(f"Saved tile {tile_name}")
++                else:
++                    logging.info(f"Skipping blank tile col={col}, row={row}")
++            except Exception as e:
++                logging.error(f"Error processing tile {col},{row}: {str(e)}")
+ 
+ patch_path = os.path.abspath("./patch") #Create a temporary folder ./patch for storing patches
+ if not os.path.exists(patch_path):
+     os.makedirs(patch_path)
+-directory_paths = glob.glob(os.path.join("WSI_example", "*.svs"))
++directory_paths = glob.glob(os.path.join("WSI_example", "*.tif"))
+ 
+ with concurrent.futures.ThreadPoolExecutor(max_workers=NUM_THREADS) as executor:
+     futures = [executor.submit(process_image, path, patch_path) for path in directory_paths]
+@@ -186,3 +202,4 @@
+ patch_path = os.path.abspath("./patch")
+ shutil.rmtree(patch_path)
+ 
++

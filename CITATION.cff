@@ -1,0 +1,66 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the article below and the original TILScout publication."
+title: "TILScout-TMA: TILScout adapted to tissue microarray cores"
+type: software
+authors:
+  - family-names: Pein
+    given-names: Robert J.
+    orcid: "https://orcid.org/0009-0008-7492-590X"
+repository-code: "https://github.com/robertpein/TILScout-TMA"
+preferred-citation:
+  type: article
+  title: "Deep learning-based tumor-infiltrating lymphocyte scoring on H&E-stained tissue microarrays and overall survival in ampullary carcinoma"
+  journal: "Virchows Archiv"
+  status: submitted
+  authors:
+    - family-names: Pein
+      given-names: Robert J.
+    - family-names: Illyés
+      given-names: Ildikó
+    - family-names: Anders
+      given-names: Florian David
+    - family-names: Kenessey
+      given-names: István
+    - family-names: Pesti
+      given-names: Adrián
+    - family-names: Kiss
+      given-names: András
+    - family-names: Borka
+      given-names: Katalin
+references:
+  - type: article
+    title: "Prediction and analysis of tumor infiltrating lymphocytes across 28 cancers by TILScout using deep learning"
+    journal: "NPJ Precision Oncology"
+    volume: 9
+    start: 76
+    year: 2025
+    doi: "10.1038/s41698-025-00866-0"
+    authors:
+      - family-names: Zhang
+        given-names: H.
+      - family-names: Chen
+        given-names: L.
+      - family-names: Li
+        given-names: L.
+      - family-names: Liu
+        given-names: Y.
+      - family-names: Das
+        given-names: B.
+      - family-names: Zhai
+        given-names: S.
+      - family-names: Tan
+        given-names: J.
+      - family-names: Jiang
+        given-names: Y.
+      - family-names: Turco
+        given-names: S.
+      - family-names: Yao
+        given-names: Y.
+      - family-names: Frishman
+        given-names: D.
+  - type: software
+    title: "TILScout"
+    repository-code: "https://github.com/huibozh/TILScout"
+    authors:
+      - family-names: Zhang
+        given-names: Huibo
