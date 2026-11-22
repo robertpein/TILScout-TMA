@@ -2,7 +2,7 @@
 
 TILScout adapted to H&E-stained tissue microarray (TMA) cores.
 
-[TILScout](https://github.com/huibozh/TILScout) (Zhang et al. 2025) classifies 150 × 150-pixel patches of H&E-stained whole slide images as TIL-positive, TIL-negative or non-tumor with a pre-trained InceptionResNetV2 model and calculates a TIL score for each image. Its script `TILscout.py` reads whole slide images with OpenSlide. This repository adapts the script to TMA cores exported as untiled `.tif` images.
+[TILScout](https://github.com/huibozh/TILScout) (Zhang et al. 2025) classifies 150 × 150-pixel patches of H&E-stained whole slide images as TIL-positive, TIL-negative or non-tumor with a pre-trained InceptionResNetV2 model and calculates a TIL score for each image. Its script `TILscout.py` reads whole slide images with OpenSlide. This repository adapts the script to TMA cores exported as untiled `.tif` images and contains the QuPath script used to export the cores.
 
 **Only the patch generation was changed.** The pre-trained model, the stain normalization, the prediction, the TIL score and the TIL maps are those of the original script.
 
@@ -45,7 +45,7 @@ All changes are shown line by line in [`changes_vs_original.diff`](changes_vs_or
 
 ## Input
 
-Place one RGB `.tif` image per core in `WSI_example/`. The images should have a resolution of 0.5 µm/pixel, so that a patch covers 75 × 75 µm. We scanned the TMA slides at 40× (about 0.25 µm/pixel) on a Pannoramic 1000 scanner (3DHISTECH), dearrayed them in QuPath 0.6.0 and exported each core as an uncompressed `.tif` at 0.5 µm/pixel (4640 × 4640 pixels).
+Place one RGB `.tif` image per core in `WSI_example/`. The images should have a resolution of about 0.5 µm/pixel, so that a patch covers about 75 × 75 µm. We scanned the TMA slides at 40× (about 0.25 µm/pixel) on a Pannoramic 1000 scanner (3DHISTECH), dearrayed them in QuPath 0.6.0 and exported each core with [`qupath/export_tma_cores.groovy`](qupath/export_tma_cores.groovy) at a downsample of 2 (about 0.5 µm/pixel; 4640 × 4640 pixels per core).
 
 Use only cores that contain tumor. As in the original script, the run stops with a division by zero if an image has neither a TIL-positive nor a TIL-negative patch.
 
