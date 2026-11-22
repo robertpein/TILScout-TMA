@@ -45,7 +45,7 @@ All changes are shown line by line in [`changes_vs_original.diff`](changes_vs_or
 
 ## Input
 
-Place one RGB `.tif` image per core in `WSI_example/`. The images should have a resolution of about 0.5 µm/pixel, so that a patch covers about 75 × 75 µm. We scanned the TMA slides at 40× (about 0.25 µm/pixel) on a Pannoramic 1000 scanner (3DHISTECH), dearrayed them in QuPath 0.6.0 and exported each core with [`qupath/export_tma_cores.groovy`](qupath/export_tma_cores.groovy) at a downsample of 2 (about 0.5 µm/pixel; 4640 × 4640 pixels per core).
+Place one RGB `.tif` image per core in `WSI_example/`. The images should have a resolution of about 0.5 µm/pixel, so that a patch covers about 75 × 75 µm. We scanned the TMA slides at 40× (about 0.25 µm/pixel) on a Pannoramic 1000 scanner (3DHISTECH), dearrayed them in QuPath 0.6.0 and exported each core with [`export_tma_cores.groovy`](export_tma_cores.groovy) at a downsample of 2 (about 0.5 µm/pixel; 4640 × 4640 pixels per core).
 
 Use only cores that contain tumor. As in the original script, the run stops with a division by zero if an image has neither a TIL-positive nor a TIL-negative patch.
 
